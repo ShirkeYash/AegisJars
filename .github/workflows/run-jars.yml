@@ -27,7 +27,7 @@ jobs:
         Remove-Item -Force $chrome_installer
 
    - name: Install ChromeDriver
-     uses: actions/setup-chromedriver@v2
+     uses: actions/setup-chromedriver@v3
      with:
         chrome-version: 'latest'
  
