@@ -25,16 +25,7 @@ jobs:
         Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/standalonesetup64.exe" -OutFile $chrome_installer
         Start-Process -FilePath $chrome_installer -ArgumentList "/silent /install" -Wait
         Remove-Item -Force $chrome_installer
- 
-   - name: Install Xvfb
-     run: sudo apt-get install -y xvfb
- 
-   - name: Start Xvfb
-     run: Xvfb :99 -screen 0 1920x1080x16 &
-    
-   - name: Set DISPLAY environment variable
-     run: export DISPLAY=:99     
-
+        
    - name: Run JAR File
      run: java -jar AegisHrms-0.0.1-SNAPSHOT-loginLogout.jar
 
