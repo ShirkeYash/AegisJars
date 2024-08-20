@@ -25,11 +25,6 @@ jobs:
         Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/standalonesetup64.exe" -OutFile $chrome_installer
         Start-Process -FilePath $chrome_installer -ArgumentList "/silent /install" -Wait
         Remove-Item -Force $chrome_installer
-
-   - name: Install ChromeDriver
-     uses: actions/setup-chromedriver@v3
-     with:
-        chrome-version: 'latest'
  
    - name: Install Xvfb
      run: sudo apt-get install -y xvfb
