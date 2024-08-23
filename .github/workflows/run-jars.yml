@@ -32,33 +32,34 @@ jobs:
         Remove-Item -Force $chrome_installer
 
    - name: Find and run JAR files
+     shell: pwsh
      run: |
         # Define the directory for reports
-        REPORT_DIR="jar_execution_reports"
-        mkdir -p $REPORT_DIR
+        $reportDir = "jar_execution_reports"
+        New-Item -ItemType Directory -Force -Path $reportDir
 
         # Find all JAR files in the repository
-        JAR_FILES=$(find . -type f -name '*.jar')
+        $jarFiles = Get-ChildItem -Recurse -Filter *.jar
 
         # Check if any JAR files are found
-        if ( -z "$JAR_FILES" ) then
-          echo "No JAR files found."
-          exit 1
-        else
-          echo "Found JAR files:"
-          echo "$JAR_FILES"
-        fi
-        
-        # Loop through each JAR file and execute it
-        for ( JAR in $JAR_FILES ); do
-          echo "Executing $JAR..."
-          
-          # Run the JAR file and capture output
-          OUTPUT_FILE="${REPORT_DIR}/$(basename ${JAR%.*}).log"
-          java -jar $JAR > $OUTPUT_FILE 2>&1
+        if ($jarFiles.Count -eq 0) {
+            Write-Output "No JAR files found."
+            exit 1
+        } else {
+            Write-Output "Found JAR files:"
+            $jarFiles | ForEach-Object { Write-Output $_.FullName }
+        }
 
-          echo "Output for $JAR has been saved to $OUTPUT_FILE"
-        done
+        # Loop through each JAR file and execute it
+        foreach ($jarFile in $jarFiles) {
+            Write-Output "Executing $($jarFile.FullName)..."
+            
+            # Run the JAR file and capture output
+            $outputFile = Join-Path $reportDir ($jarFile.BaseName + ".log")
+            java -jar $jarFile.FullName *> $outputFile 2>&1
+
+            Write-Output "Output for $($jarFile.FullName) has been saved to $outputFile"
+        }
 
    - name: Upload JAR execution reports
      uses: actions/upload-artifact@v3
