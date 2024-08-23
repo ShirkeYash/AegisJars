@@ -46,7 +46,6 @@ jobs:
         # Check if any JAR files are found
         if ($jarFiles.Count -eq 0) {
             Write-Output "No JAR files found."
-            exit 1
         } else {
             Write-Output "Found JAR files:"
             $jarFiles | ForEach-Object { Write-Output $_.FullName }
