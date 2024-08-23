@@ -30,29 +30,35 @@ jobs:
         Invoke-WebRequest -Uri "https://dl.google.com/chrome/install/standalonesetup64.exe" -OutFile $chrome_installer
         Start-Process -FilePath $chrome_installer -ArgumentList "/silent /install" -Wait
         Remove-Item -Force $chrome_installer
-        
-   - name: Run JAR File
-     run: java -jar AegisHrms-0.0.1-SNAPSHOT-loginLogout.jar
 
-   - name: Run JAR File
-     run: java -jar AegisHrms-0.0.1-SNAPSHOT-addDepartment.jar
-
-   - name: Generate JAR report
+   - name: Find and run JAR files
      run: |
-        # Define the report file
-        REPORT_FILE="jar_files_report.txt"
+        # Define the directory for reports
+        REPORT_DIR="jar_execution_reports"
+        mkdir -p $REPORT_DIR
 
-        # Clear or create the report file
-        > $REPORT_FILE
+        # Find all JAR files in the repository
+        JAR_FILES=$(find . -type f -name '*.jar')
 
-        echo "JAR files in the repository:" >> $REPORT_FILE
-        find . -type f -name '*.jar' >> $REPORT_FILE
-        
-        cat $REPORT_FILE
+        # Check if any JAR files are found
+        if [ -z "$JAR_FILES" ]; then
+          echo "No JAR files found."
+          exit 1
+        fi
 
-   - name: Upload report
+        # Loop through each JAR file and execute it
+        for JAR in $JAR_FILES; do
+          echo "Executing $JAR..."
+          
+          # Run the JAR file and capture output
+          OUTPUT_FILE="${REPORT_DIR}/$(basename ${JAR%.*}).log"
+          java -jar $JAR > $OUTPUT_FILE 2>&1
+
+          echo "Output for $JAR has been saved to $OUTPUT_FILE"
+        done
+
+   - name: Upload JAR execution reports
      uses: actions/upload-artifact@v3
      with:
-        name: jar-report
-        path: jar_files_report.txt  
-  
+        name: jar-execution-reports
+        path: jar_execution_reports/
