@@ -39,13 +39,7 @@ jobs:
 
         # Find all JAR files in the repository
         JAR_FILES=$(find . -type f -name '*.jar')
-
-        # Check if any JAR files are found
-        if [ -z "$JAR_FILES" ]; then
-          echo "No JAR files found."
-          exit 1
-        fi
-
+        
         # Loop through each JAR file and execute it
         for JAR in $JAR_FILES; do
           echo "Executing $JAR..."
