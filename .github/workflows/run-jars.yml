@@ -36,4 +36,23 @@ jobs:
 
    - name: Run JAR File
      run: java -jar AegisHrms-0.0.1-SNAPSHOT-addDepartment.jar
+
+   - name: Generate JAR report
+     run: |
+        # Define the report file
+        REPORT_FILE="jar_files_report.txt"
+
+        # Clear or create the report file
+        > $REPORT_FILE
+
+        echo "JAR files in the repository:" >> $REPORT_FILE
+        find . -type f -name '*.jar' >> $REPORT_FILE
+        
+        cat $REPORT_FILE
+
+   - name: Upload report
+     uses: actions/upload-artifact@v3
+     with:
+        name: jar-report
+        path: jar_files_report.txt  
   
