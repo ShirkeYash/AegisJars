@@ -41,7 +41,7 @@ jobs:
         JAR_FILES=$(find . -type f -name '*.jar')
 
         # Check if any JAR files are found
-        if ( -z "$JAR_FILES" ); then
+        if ( -z "$JAR_FILES" ) then
           echo "No JAR files found."
           exit 1
         else
