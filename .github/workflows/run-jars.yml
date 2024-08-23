@@ -44,6 +44,9 @@ jobs:
         if ( -z "$JAR_FILES" ); then
           echo "No JAR files found."
           exit 1
+        else
+          echo "Found JAR files:"
+          echo "$JAR_FILES"
         fi
         
         # Loop through each JAR file and execute it
