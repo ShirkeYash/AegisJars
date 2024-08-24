@@ -33,34 +33,32 @@ jobs:
         Start-Process -FilePath $chrome_installer -ArgumentList "/silent /install" -Wait
         Remove-Item -Force $chrome_installer
 
-   - name: Find and run JAR files
-     shell: pwsh
+   - name: Run JAR files and generate report
+     id: run-jars
      run: |
-        # Define the directory for reports
-        $reportDir = "jar_execution_reports"
-        New-Item -ItemType Directory -Force -Path $reportDir
+          # Create a directory for reports
+          mkdir -p reports
 
-        # Find all JAR files in the repository
-        $jarFiles = Get-ChildItem -Recurse -Filter *.jar
+          # Example JAR files to run (adjust as needed)
+          jar_files=("build/libs/app1.jar" "build/libs/app2.jar")
 
-        # Check if any JAR files are found
-        if ($jarFiles.Count -eq 0) {
-            Write-Output "No JAR files found."
-        } else {
-            Write-Output "Found JAR files:"
-            $jarFiles | ForEach-Object { Write-Output $_.FullName }
-        }
+          # Create the report file
+          report_file="reports/execution-report.md"
+          echo "| JAR File         | Status |" > $report_file
+          echo "|------------------|--------|" >> $report_file
 
-        # Loop through each JAR file and execute it
-        foreach ($jarFile in $jarFiles) {
-            Write-Output "Executing $($jarFile.FullName)..."
-            
-            # Run the JAR file and capture output
-            $outputFile = Join-Path $reportDir ($jarFile.BaseName + ".log")
-            java -jar $jarFile.FullName *> $outputFile 2>&1
+          # Iterate over JAR files
+          for ( jar in "${jar_files[@]}" ); do
+            echo "Running $jar..."
+            if ( java -jar $jar ); then
+              echo "| $jar | Passed |" >> $report_file
+            else
+              echo "| $jar | Failed |" >> $report_file
+            fi
+          done
 
-            Write-Output "Output for $($jarFile.FullName) has been saved to $outputFile"
-        }
+          # Output the report
+          cat $report_file
 
    - name: Upload JAR execution reports
      uses: actions/upload-artifact@v3
