@@ -48,7 +48,7 @@ jobs:
           echo "|------------------|--------|" >> $report_file
 
           # Iterate over JAR files
-          for ( jar in "${jar_files[@]}" ); do
+          for jar in "${jar_files[@]}"; do
             echo "Running $jar..."
             if ( java -jar $jar ); then
               echo "| $jar | Passed |" >> $report_file
