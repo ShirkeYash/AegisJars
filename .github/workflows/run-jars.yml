@@ -33,32 +33,36 @@ jobs:
         Start-Process -FilePath $chrome_installer -ArgumentList "/silent /install" -Wait
         Remove-Item -Force $chrome_installer
 
+   - name: Build JAR files
+     run: |
+          ./gradlew build  # Adjust if you're using Maven or another build tool
+
    - name: Run JAR files and generate report
      id: run-jars
+     shell: pwsh
      run: |
           # Create a directory for reports
-          mkdir -p reports
+          New-Item -Path "reports" -ItemType Directory -Force
 
           # Example JAR files to run (adjust as needed)
-          jar_files= Get-ChildItem -Recurse -Filter *.jar
+          $jar_files = Get-ChildItem -Recurse -Filter *.jar
 
           # Create the report file
-          report_file="reports/execution-report.md"
-          echo "| JAR File         | Status |" > $report_file
-          echo "|------------------|--------|" >> $report_file
+          $report_file = "reports/execution-report.md"
+          "@| JAR File         | Status ||------------------|--------|" | Out-File -FilePath $report_file -Encoding utf8
 
           # Iterate over JAR files
-          for jar in "${jar_files[@]}"; do
-            echo "Running $jar..."
-            if ( java -jar $jar ); then
-              echo "| $jar | Passed |" >> $report_file
-            else
-              echo "| $jar | Failed |" >> $report_file
-            fi
-          done
+          foreach ($jar in $jar_files) {
+            Write-Output "Running $jar..."
+            if (& java -jar $jar) {
+              "@| $jar | Passed |" | Out-File -FilePath $report_file -Append -Encoding utf8
+            } else {
+              "@| $jar | Failed |" | Out-File -FilePath $report_file -Append -Encoding utf8
+            }
+          }
 
           # Output the report
-          cat $report_file
+          Get-Content -Path $report_file
 
    - name: Upload execution report as artifact
      uses: actions/upload-artifact@v3
