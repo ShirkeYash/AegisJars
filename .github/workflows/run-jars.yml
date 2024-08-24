@@ -54,7 +54,7 @@ jobs:
               "@| $jar | Passed |" | Out-File -FilePath $report_file -Append -Encoding utf8
             } else {
               "@| $jar | Failed |" | Out-File -FilePath $report_file -Append -Encoding utf8
-              Write-Output "Error running $jar: $result"
+              Write-Output "Error running $($jar): $result"  # Use $() to ensure proper variable interpolation
             }
           }
 
