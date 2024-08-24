@@ -40,7 +40,7 @@ jobs:
           mkdir -p reports
 
           # Example JAR files to run (adjust as needed)
-          jar_files=("build/libs/app1.jar" "build/libs/app2.jar")
+          jar_files= Get-ChildItem -Recurse -Filter *.jar
 
           # Create the report file
           report_file="reports/execution-report.md"
@@ -60,8 +60,8 @@ jobs:
           # Output the report
           cat $report_file
 
-   - name: Upload JAR execution reports
+   - name: Upload execution report as artifact
      uses: actions/upload-artifact@v3
      with:
-        name: jar-execution-reports
-        path: jar_execution_reports/
+          name: jar-execution-report
+          path: reports/execution-report.md
