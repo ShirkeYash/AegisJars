@@ -47,13 +47,14 @@ jobs:
           $report_file = "reports/execution-report.md"
           "@| JAR File         | Status ||------------------|--------|" | Out-File -FilePath $report_file -Encoding utf8
 
-          # Iterate over JAR files
           foreach ($jar in $jar_files) {
             Write-Output "Running $jar..."
-            if (& java -jar $jar) {
+            $result = & java -jar $jar 2>&1  # Capture both output and errors
+            if ($LASTEXITCODE -eq 0) {
               "@| $jar | Passed |" | Out-File -FilePath $report_file -Append -Encoding utf8
             } else {
               "@| $jar | Failed |" | Out-File -FilePath $report_file -Append -Encoding utf8
+              Write-Output "Error running $jar: $result"
             }
           }
 
