@@ -33,10 +33,6 @@ jobs:
         Start-Process -FilePath $chrome_installer -ArgumentList "/silent /install" -Wait
         Remove-Item -Force $chrome_installer
 
-   - name: Build JAR files
-     run: |
-          ./gradlew build  # Adjust if you're using Maven or another build tool
-
    - name: Run JAR files and generate report
      id: run-jars
      shell: pwsh
