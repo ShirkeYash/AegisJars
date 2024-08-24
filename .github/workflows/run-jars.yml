@@ -17,6 +17,8 @@ jobs:
    steps:
    - name: checkout code
      uses: actions/checkout@v3
+     with:
+        fetch-depth: 1
      
    - name: Set up JDK 17
      uses: actions/setup-java@v4
@@ -31,38 +33,36 @@ jobs:
         Start-Process -FilePath $chrome_installer -ArgumentList "/silent /install" -Wait
         Remove-Item -Force $chrome_installer
 
-   - name: Find and run JAR files
+   - name: Run JAR files and generate report
+     id: run-jars
      shell: pwsh
      run: |
-        # Define the directory for reports
-        $reportDir = "jar_execution_reports"
-        New-Item -ItemType Directory -Force -Path $reportDir
+          # Create a directory for reports
+          New-Item -Path "reports" -ItemType Directory -Force
 
-        # Find all JAR files in the repository
-        $jarFiles = Get-ChildItem -Recurse -Filter *.jar
+          # Example JAR files to run (adjust as needed)
+          $jar_files = Get-ChildItem -Recurse -Filter *.jar
 
-        # Check if any JAR files are found
-        if ($jarFiles.Count -eq 0) {
-            Write-Output "No JAR files found."
-            exit 1
-        } else {
-            Write-Output "Found JAR files:"
-            $jarFiles | ForEach-Object { Write-Output $_.FullName }
-        }
+          # Create the report file
+          $report_file = "reports/execution-report.md"
+          "@| JAR File         | Status ||------------------|--------|" | Out-File -FilePath $report_file -Encoding utf8
 
-        # Loop through each JAR file and execute it
-        foreach ($jarFile in $jarFiles) {
-            Write-Output "Executing $($jarFile.FullName)..."
-            
-            # Run the JAR file and capture output
-            $outputFile = Join-Path $reportDir ($jarFile.BaseName + ".log")
-            java -jar $jarFile.FullName *> $outputFile 2>&1
+          foreach ($jar in $jar_files) {
+            Write-Output "Running $jar..."
+            $result = & java -jar $jar 2>&1  # Capture both output and errors
+            if ($LASTEXITCODE -eq 0) {
+              "@| $jar | Passed |" | Out-File -FilePath $report_file -Append -Encoding utf8
+            } else {
+              "@| $jar | Failed |" | Out-File -FilePath $report_file -Append -Encoding utf8
+              Write-Output "Error running $($jar): $result"  # Use $() to ensure proper variable interpolation
+            }
+          }
 
-            Write-Output "Output for $($jarFile.FullName) has been saved to $outputFile"
-        }
+          # Output the report
+          Get-Content -Path $report_file
 
-   - name: Upload JAR execution reports
+   - name: Upload execution report as artifact
      uses: actions/upload-artifact@v3
      with:
-        name: jar-execution-reports
-        path: jar_execution_reports/
+          name: jar-execution-report
+          path: reports/execution-report.md
